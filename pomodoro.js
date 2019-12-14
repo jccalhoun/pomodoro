@@ -1,6 +1,7 @@
+var alarmAudio;
 /** Represents a timer that can count down. */
 function CountdownTimer(seconds, tickRate) {
-    this.seconds = seconds || (25*60);
+    this.seconds = seconds || (.1*60);
     this.tickRate = tickRate || 500; // Milliseconds
     this.tickFunctions = [];
     this.isRunning = false;
@@ -88,7 +89,7 @@ function parseSeconds(seconds) {
 function playAlarm() {
     var alarmValue = document.getElementById('alarm_select').value;
     if (alarmValue != 'none') {
-        var alarmAudio = document.getElementById(alarmValue);
+        alarmAudio = document.getElementById(alarmValue);
         var alarmVolume = document.getElementById('alarm_volume').value;
         alarmAudio.volume = alarmVolume / 100;
         alarmAudio.play();
@@ -118,7 +119,7 @@ window.onload = function () {
     var timerDisplay = document.getElementById('timer'),
         customTimeInput = document.getElementById('ipt_custom'),
         timer = new CountdownTimer(),
-        timeObj = parseSeconds(25*60);
+        timeObj = parseSeconds(.1*60);
     
     /** Set the time on the main clock display and
         set the time remaining section in the title. */
@@ -164,32 +165,19 @@ window.onload = function () {
     document.getElementById('btn_pause').addEventListener(
         'click', function () {
             timer.pause(); 
+            alarmAudio.pause();
+            alarmAudio.currentTime = 0;
         });
         
     document.getElementById('btn_reset').addEventListener(
         'click', function () {
             resetMainTimer(timer.seconds);
             timer.start();
+            alarmAudio.pause();
+            alarmAudio.currentTime = 0;
         });
         
-    document.getElementById('btn_pomodoro').addEventListener(
-        'click', function () {
-            resetMainTimer(25*60);
-            timer.start();
-        });
-        
-    document.getElementById('btn_shortbreak').addEventListener(
-        'click', function () {
-            resetMainTimer(5*60);
-            timer.start();
-        });
-        
-    document.getElementById('btn_longbreak').addEventListener(
-        'click', function () {
-            resetMainTimer(15*60);
-            timer.start();
-        });
-        
+    
     document.getElementById('btn_custom').addEventListener(
         'click', function () {
             customUnits = document.getElementById('custom_units').value
@@ -219,4 +207,20 @@ window.onload = function () {
             timer.start();
         }
     });
+
+ // Bind keyboard shortcut for starting/pausing timer
+  Mousetrap.bind('space', function (e) {
+    // Remove default behavior of buttons (page scrolling)
+    if (e.preventDefault()) {
+      e.preventDefault();
+    } else {
+      e.returnValue = false; //IE
+    }    // Pause or start the timer
+
+    if (timer.isRunning) {
+      timer.pause();
+    } else {
+      timer.start();
+    }
+  });
 };
